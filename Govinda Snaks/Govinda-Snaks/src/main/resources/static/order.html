@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Place Order - Govinda Snacks</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          height: 100%;
+          background: url('/assets/background.jpg') no-repeat center center fixed;
+          background-size: cover;
+        }
+
+        .overlay {
+          background-color: (255, 255, 255, 0.7);
+          min-height: 100vh;
+          padding: 2rem;
+          backdrop-filter: blur(2px);
+          overflow-x: hidden;
+          overflow-y: auto;
+        }
+
+        h1 {
+          text-align: center;
+          color: red;
+          margin-bottom: 1rem;
+        }
+
+        form {
+          max-width: 600px;
+          margin: auto;
+          background: white;
+          padding: 2rem;
+          border-radius: 8px;
+          box-shadow: 0 0 15px rgba(0,0,0,0.15);
+        }
+
+        label {
+          display: block;
+          margin-top: 1rem;
+          font-weight: bold;
+        }
+
+        input, select {
+          width: 100%;
+          padding: 0.5rem;
+          margin-top: 0.3rem;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+        }
+
+        .error {
+          border-color: red;
+        }
+
+        .error-message {
+          color: red;
+          font-size: 0.85rem;
+          margin-top: 0.2rem;
+        }
+
+        .items {
+          margin-top: 1rem;
+        }
+
+        .item-row {
+          display: flex;
+          gap: 1rem;
+          margin-top: 0.5rem;
+        }
+
+        .item-row input,
+        .item-row select {
+          flex: 1;
+        }
+
+        .total {
+          text-align: right;
+          margin-top: 1rem;
+          font-weight: bold;
+        }
+
+        .submit-container {
+          display: flex;
+          justify-content: center;
+        }
+
+        button {
+          margin-top: 1.5rem;
+          background-color: #2563eb;
+          color: white;
+          border: none;
+          padding: 0.7rem 1.5rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="overlay">
+    <h1>Place Your Order</h1>
+    <form id="orderForm" novalidate>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" />
+        <div class="error-message" id="emailError"></div>
+
+        <label for="customerName">Customer Name</label>
+        <input type="text" id="customerName" name="customerName" />
+        <div class="error-message" id="nameError"></div>
+
+        <label for="contactNumber">Contact Number</label>
+        <input type="text" id="contactNumber" name="contactNumber" />
+        <div class="error-message" id="contactError"></div>
+
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" />
+        <div class="error-message" id="addressError"></div>
+
+        <div class="items">
+            <label>Snacks</label>
+            <div id="itemList">
+                <!-- Snack items dynamically added -->
+            </div>
+            <button type="button" onclick="addItem()">Add Snack</button>
+        </div>
+
+        <div class="total" id="totalPrice">Total: ₹0</div>
+
+        <div class="submit-container">
+            <button type="submit">Submit Order</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let snackOptions = [];
+
+    async function fetchSnacks() {
+      const response = await fetch('/api/user/orders/products');
+      const data = await response.json();
+      snackOptions = data;
+      addItem(); // add one item initially
+    }
+
+    function addItem() {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'item-row';
+
+      const select = document.createElement('select');
+      select.name = 'snackName';
+      snackOptions.forEach(snack => {
+        const option = document.createElement('option');
+        option.value = snack.name;
+        option.textContent = `${snack.name} - ₹${snack.price}`;
+        option.setAttribute('data-price', snack.price);
+        select.appendChild(option);
+      });
+
+      const quantity = document.createElement('input');
+      quantity.type = 'number';
+      quantity.name = 'quantity';
+      quantity.min = 1;
+      quantity.value = 1;
+
+      select.onchange = updateTotal;
+      quantity.oninput = updateTotal;
+
+      itemDiv.appendChild(select);
+      itemDiv.appendChild(quantity);
+      document.getElementById('itemList').appendChild(itemDiv);
+
+      updateTotal();
+    }
+
+    function updateTotal() {
+      let total = 0;
+      const rows = document.querySelectorAll('.item-row');
+      rows.forEach(row => {
+        const select = row.querySelector('select');
+        const quantity = row.querySelector('input');
+        const price = parseFloat(select.selectedOptions[0].getAttribute('data-price'));
+        const qty = parseInt(quantity.value || 0);
+        total += price * qty;
+      });
+      document.getElementById('totalPrice').textContent = `Total: ₹${total}`;
+    }
+
+    function validateForm() {
+      let valid = true;
+
+      const fields = [
+        { id: "email", errorId: "emailError", msg: "Email is required" },
+        { id: "customerName", errorId: "nameError", msg: "Customer name is required" },
+        { id: "contactNumber", errorId: "contactError", msg: "Contact number is required" },
+        { id: "address", errorId: "addressError", msg: "Address is required" }
+      ];
+
+      fields.forEach(({ id, errorId, msg }) => {
+        const input = document.getElementById(id);
+        const errorDiv = document.getElementById(errorId);
+        if (!input.value.trim()) {
+          input.classList.add('error');
+          errorDiv.textContent = msg;
+          valid = false;
+        } else {
+          input.classList.remove('error');
+          errorDiv.textContent = '';
+        }
+      });
+
+      return valid;
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!validateForm()) return;
+
+      const payload = {
+        email: document.getElementById('email').value.trim(),
+        customerName: document.getElementById('customerName').value.trim(),
+        contactNumber: document.getElementById('contactNumber').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        items: []
+      };
+
+      document.querySelectorAll('.item-row').forEach(row => {
+        const snackName = row.querySelector('select').value;
+        const quantity = parseInt(row.querySelector('input').value || 0);
+        if (snackName && quantity > 0) {
+          payload.items.push({ snackName, quantity });
+        }
+      });
+
+      const response = await fetch('/api/user/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        alert('Order placed successfully!');
+        location.reload();
+      } else {
+        const errorData = await response.json();
+        alert('Failed to submit order:\n' + JSON.stringify(errorData, null, 2));
+      }
+    });
+
+    fetchSnacks();
+</script>
+</body>
+</html>
