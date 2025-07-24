@@ -1,11 +1,27 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-slim
+# Use Maven image to build the project first
+FROM maven:3.9.4-eclipse-temurin-17 AS builder
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the built JAR file
-COPY target/*.jar app.jar
+# Copy all files to container
+COPY . .
 
-# Run the JAR file
+# Build the application
+RUN mvn clean package -DskipTests
+
+# ==============================
+
+# Use a lightweight JDK to run the app
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+# Copy the jar from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose port (optional if Render sets it)
+EXPOSE 8080
+
+# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
