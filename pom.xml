@@ -13,10 +13,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>snaks.shop</groupId>
-	<artifactId>Govinda-Snaks</artifactId>
+	<groupId>Snacks.shop</groupId>
+	<artifactId>Govinda-Snacks</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Govinda-Snaks</name>
+	<name>Govinda-Snacks</name>
 	<description>Snack shop using Spring Boot</description>
 
 	<properties>
