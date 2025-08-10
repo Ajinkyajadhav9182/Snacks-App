@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Dashboard — Govinda Snacks</title>
+    <link rel="icon" href="/favicon.ico" />
+    <style>
+        :root{
+          --bg: #0f172a;           /* deep navy */
+          --panel: #0b1220;        /* darker panel */
+          --muted: #94a3b8;
+          --card: #ffffff;
+          --accent: #06b6d4;       /* teal/cyan */
+          --accent-2: #7c3aed;     /* purple */
+          --success: #10b981;      /* green */
+          --danger: #ef4444;       /* red */
+          --glass: rgba(255,255,255,0.06);
+        }
+        *{box-sizing:border-box}
+        body{
+          margin:0;
+          font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+          background: linear-gradient(180deg,#f8fafc 0%, #eef2ff 100%);
+          color: #0f172a;
+          -webkit-font-smoothing:antialiased;
+          -moz-osx-font-smoothing:grayscale;
+        }
+
+        header {
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:1rem;
+          padding:1rem 1.25rem;
+          background: linear-gradient(90deg,var(--accent), var(--accent-2));
+          color:white;
+          border-bottom-left-radius:12px;
+          border-bottom-right-radius:12px;
+          box-shadow: 0 6px 18px rgba(12, 18, 36, 0.12);
+        }
+
+        header h1 { margin:0; font-size:1.25rem; letter-spacing: -0.2px; }
+        .header-actions { display:flex; gap:.6rem; align-items:center; }
+
+        .btn {
+          background: rgba(255,255,255,0.12);
+          color: white;
+          border: 0;
+          padding: 0.5rem 0.8rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight:600;
+          transition: transform .12s ease, background .12s ease;
+        }
+        .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.18); }
+        .btn.primary {
+          background: white;
+          color: var(--accent-2);
+          box-shadow: 0 6px 14px rgba(124,58,237,0.12);
+        }
+        .btn.ghost {
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        main.container {
+          max-width: 1200px;
+          margin: 1.25rem auto;
+          padding: 0 1rem;
+        }
+
+        .actions-row {
+          display:flex;
+          justify-content:space-between;
+          gap:1rem;
+          align-items:center;
+          margin-bottom: .75rem;
+        }
+
+        .search {
+          display:flex;
+          gap: .5rem;
+          align-items:center;
+        }
+        .search input {
+          padding: .55rem .75rem;
+          border-radius: 8px;
+          border: 1px solid #e6edf3;
+          min-width:220px;
+        }
+
+        /* grid of cards */
+        .grid {
+          display:grid;
+          grid-template-columns: repeat(1, minmax(0,1fr));
+          gap: 1rem;
+        }
+        @media(min-width:720px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        @media(min-width:1100px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+        .card {
+          background: linear-gradient(180deg, white, #fbfdff);
+          border-radius: 12px;
+          padding: 1rem;
+          box-shadow: 0 6px 18px rgba(12,18,36,0.06);
+          display:flex;
+          flex-direction:column;
+          gap:.6rem;
+          transition: transform .12s ease, box-shadow .12s ease;
+          min-height: 140px;
+        }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(12,18,36,0.09); }
+
+        .card-head {
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:.5rem;
+        }
+
+        .cust {
+          font-weight:700;
+          color:#0b1220;
+        }
+        .meta { color: var(--muted); font-size: .9rem }
+
+        .items {
+          margin-top: .4rem;
+          display:block;
+          color:#0b1220;
+          font-size: .95rem;
+          line-height:1.45;
+          max-height: 160px;
+          overflow:auto;
+        }
+        .item-row {
+          display:flex;
+          justify-content:space-between;
+          gap:.5rem;
+          padding: .2rem 0;
+          align-items:center;
+        }
+        .item-name { color:#0b1220; }
+        .item-qty { color: #374151; font-size:.9rem; margin-left:.6rem; }
+
+        .card-foot {
+          margin-top:auto;
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap: .5rem;
+        }
+        .total { font-weight:800; color: var(--success); font-size:1rem; }
+        .status {
+          padding: .25rem .5rem;
+          border-radius: 999px;
+          font-weight:700;
+          font-size:.85rem;
+        }
+        .status.pending { background: rgba(99,102,241,0.12); color:#4f46e5; }
+        .status.done { background: rgba(16,185,129,0.12); color:#059669; }
+
+        .small-btn {
+          padding: .4rem .6rem;
+          border-radius:8px;
+          border:0;
+          cursor:pointer;
+          font-weight:700;
+          font-size:.9rem;
+        }
+        .small-btn.deliver { background: var(--success); color:white; }
+        .small-btn.disabled { background:#e6eef2; color:#94a3b8; cursor:not-allowed; }
+
+        /* toast */
+        .toast-container {
+          position: fixed;
+          right: 1rem;
+          top: 1rem;
+          z-index: 9999;
+          display:flex;
+          flex-direction:column;
+          gap:.5rem;
+        }
+        .toast {
+          background: rgba(15,23,42,0.95);
+          color: white;
+          padding: .6rem .9rem;
+          border-radius: 10px;
+          min-width: 220px;
+          box-shadow: 0 8px 28px rgba(2,6,23,0.4);
+          display:flex;
+          gap:.6rem;
+          align-items:center;
+          font-weight:600;
+        }
+        .toast.success { background: linear-gradient(90deg, #059669, #10b981); }
+        .toast.info { background: linear-gradient(90deg, #0ea5e9, #06b6d4); }
+
+        /* empty state */
+        .empty {
+          padding:2rem;
+          text-align:center;
+          color: #64748b;
+          border-radius: 10px;
+          background: white;
+          box-shadow: 0 6px 14px rgba(12,18,36,0.04);
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div style="display:flex;gap:1rem;align-items:center">
+        <img src="/favicon.ico" alt="logo" style="width:36px;height:36px;border-radius:8px;background:white;padding:4px"/>
+        <div>
+            <h1>Govinda Snacks — Admin</h1>
+            <div style="font-size:.85rem;opacity:0.9">Orders & Product Management</div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn ghost" id="refreshBtn" title="Refresh orders">Refresh</button>
+        <button class="btn" id="manageProductsBtn">Manage Products</button>
+        <button class="btn primary" id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+<main class="container">
+    <div class="actions-row">
+        <div style="display:flex;gap:.75rem;align-items:center">
+            <div style="font-weight:700">Orders</div>
+            <div style="color:var(--muted)">(Realtime)</div>
+        </div>
+
+        <div class="search">
+            <input id="searchInput" placeholder="Search by customer, item or contact..." />
+        </div>
+    </div>
+
+    <div id="ordersWrap">
+        <div id="ordersGrid" class="grid"></div>
+        <div id="emptyState" class="empty" style="display:none;margin-top:1rem;">
+            No orders yet.
+        </div>
+    </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    // ======= CONFIG =======
+    const ORDERS_API = '/api/admin/orders';         // GET
+    const PRODUCTS_API = '/api/admin/products';     // GET
+    const DELIVER_API_TEMPLATE = id => `/api/admin/orders/${id}/deliver`; // PUT
+    const POLL_INTERVAL_MS = 8000;
+
+    // ======= STATE =======
+    let orders = [];              // array of order objects from backend
+    let productsMap = new Map();  // snackName -> price (number)
+    let knownOrderIds = new Set(); // to detect new orders
+    let filteredOrders = [];      // after search
+
+    // ======= UTIL: Toasts =======
+    const toastContainer = document.getElementById('toastContainer');
+    function showToast(message, type='info', timeout=4500){
+      const el = document.createElement('div');
+      el.className = `toast ${type==='success' ? 'success' : 'info'}`;
+      el.innerText = message;
+      toastContainer.prepend(el);
+      setTimeout(()=> {
+        try{ el.style.opacity='0'; el.remove(); }catch(e){}
+      }, timeout);
+    }
+
+    // ======= FETCH PRODUCTS (for price lookup) =======
+    async function loadProducts(){
+      try{
+        const res = await fetch(PRODUCTS_API, { credentials: 'same-origin' });
+        if(!res.ok) throw new Error('Failed to load products');
+        const list = await res.json();
+        productsMap.clear();
+        list.forEach(p => {
+          if(p && p.name) productsMap.set(p.name.toLowerCase(), Number(p.price));
+        });
+      }catch(err){
+        // keep productsMap maybe stale; not fatal
+        console.error('Products load error', err);
+      }
+    }
+
+    // ======= FETCH ORDERS =======
+    async function fetchOrders({ silent=false } = {}){
+      try{
+        const res = await fetch(ORDERS_API, { credentials: 'same-origin' });
+        if(!res.ok){
+          console.error('Failed to fetch orders', res.status);
+          if(!silent) showToast('Failed to fetch orders', 'info');
+          return;
+        }
+        const data = await res.json();
+        // Expecting an array. Normalize empty.
+        const list = Array.isArray(data) ? data : (data ? [data] : []);
+        // detect new orders
+        const newOrders = list.filter(o => !knownOrderIds.has(o.id));
+        if(newOrders.length > 0){
+          newOrders.forEach(n => {
+            // create friendly message (use customerName or email)
+            const who = n.customerName || n.email || 'a customer';
+            showToast(`New order from ${who}`, 'success', 4500);
+            knownOrderIds.add(n.id);
+          });
+        }
+        // update knownOrderIds set to contain all current ids
+        knownOrderIds = new Set(list.map(o => o.id));
+
+        orders = list;
+        applySearchAndRender();
+      }catch(err){
+        console.error('fetchOrders error', err);
+        if(!silent) showToast('Could not load orders', 'info');
+      }
+    }
+
+    // ======= Compute item price helper =======
+    function lookupPrice(snackName){
+      if(!snackName) return undefined;
+      const p = productsMap.get(String(snackName).toLowerCase());
+      return (p === undefined) ? undefined : Number(p);
+    }
+
+    // ======= Render =======
+    const grid = document.getElementById('ordersGrid');
+    function renderOrders(list){
+      grid.innerHTML = '';
+      if(!list || list.length === 0){
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('emptyState').style.display = 'none';
+      }
+
+      list.forEach(order => {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        // Header
+        const head = document.createElement('div');
+        head.className = 'card-head';
+        const left = document.createElement('div');
+        left.innerHTML = `<div class="cust">${escapeHtml(order.customerName || 'Unknown')}</div>
+                          <div class="meta">${escapeHtml(order.email || '')} • ${escapeHtml(order.contactNumber || '')}</div>`;
+        head.appendChild(left);
+
+        // Right side small meta
+        const right = document.createElement('div');
+        const statusEl = document.createElement('div');
+        statusEl.className = 'status ' + (order.delivered ? 'done' : 'pending');
+        statusEl.innerText = order.delivered ? 'DELIVERED' : 'PENDING';
+        right.appendChild(statusEl);
+        head.appendChild(right);
+        card.appendChild(head);
+
+        // Items block
+        const itemsWrap = document.createElement('div');
+        itemsWrap.className = 'items';
+        if(Array.isArray(order.items) && order.items.length>0){
+          order.items.forEach(it => {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+
+            const nameSpan = document.createElement('div');
+            nameSpan.className = 'item-name';
+            // show snackName and quantity
+            nameSpan.innerText = `${it.snackName || 'Item'} (${it.quantity || 0})`;
+
+            const rightSpan = document.createElement('div');
+            const price = lookupPrice(it.snackName);
+            // Show price only if available (avoid "undefined")
+            if(price !== undefined && !Number.isNaN(price)){
+              rightSpan.innerText = `₹${(price * (it.quantity || 0)).toFixed(2)}`;
+            } else {
+              rightSpan.innerText = ''; // omit price if not found
+            }
+
+            row.appendChild(nameSpan);
+            row.appendChild(rightSpan);
+            itemsWrap.appendChild(row);
+          });
+        } else {
+          itemsWrap.innerHTML = '<div class="meta">No items recorded</div>';
+        }
+        card.appendChild(itemsWrap);
+
+        // Footer: total, actions
+        const foot = document.createElement('div');
+        foot.className = 'card-foot';
+
+        // total: prefer backend totalAmount if present otherwise compute from product map
+        let totalAmount = null;
+        if(typeof order.totalAmount === 'number' && !Number.isNaN(order.totalAmount)){
+          totalAmount = order.totalAmount;
+        } else {
+          // compute from product prices we have
+          totalAmount = 0;
+          if(Array.isArray(order.items)){
+            order.items.forEach(it => {
+              const p = lookupPrice(it.snackName);
+              if(p !== undefined && !Number.isNaN(p)) totalAmount += p * (it.quantity || 0);
+            });
+          }
+        }
+        const totalEl = document.createElement('div');
+        totalEl.className = 'total';
+        totalEl.innerText = (totalAmount && totalAmount > 0) ? `₹${totalAmount.toFixed(2)}` : '—';
+        foot.appendChild(totalEl);
+
+        // actions
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = '.5rem';
+        // delivered button
+        const deliverBtn = document.createElement('button');
+        deliverBtn.className = 'small-btn deliver';
+        deliverBtn.innerText = order.delivered ? 'Delivered' : 'Mark Delivered';
+        if(order.delivered){
+          deliverBtn.classList.add('disabled');
+          deliverBtn.disabled = true;
+        } else {
+          deliverBtn.onclick = async () => {
+            deliverBtn.disabled = true;
+            deliverBtn.classList.add('disabled');
+            try{
+              const resp = await fetch(DELIVER_API_TEMPLATE(order.id), { method: 'PUT', credentials: 'same-origin' });
+              if(!resp.ok) throw new Error('Failed');
+              showToast('Order marked delivered', 'success', 2500);
+              await reloadAllData(true);
+            }catch(err){
+              console.error(err);
+              showToast('Could not mark delivered', 'info', 3000);
+              deliverBtn.disabled = false;
+              deliverBtn.classList.remove('disabled');
+            }
+          };
+        }
+        actions.appendChild(deliverBtn);
+
+        // view details button (optional)
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'small-btn';
+        viewBtn.innerText = 'View';
+        viewBtn.onclick = () => {
+          // open a simple modal-like detail (for now, open native alert)
+          const itemsText = Array.isArray(order.items)? order.items.map(i => `${i.snackName} (${i.quantity})`).join('\\n') : '';
+          alert(`Order: ${order.customerName}\\nContact: ${order.contactNumber}\\nAddress: ${order.address}\\n\\nItems:\\n${itemsText}`);
+        };
+        actions.appendChild(viewBtn);
+
+        foot.appendChild(actions);
+        card.appendChild(foot);
+
+        grid.appendChild(card);
+      });
+    }
+
+    // ======= Search & filter =======
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => applySearchAndRender());
+
+    function applySearchAndRender(){
+      const q = String(searchInput.value || '').trim().toLowerCase();
+      if(!q){
+        filteredOrders = orders.slice();
+      } else {
+        filteredOrders = orders.filter(o => {
+          const customer = (o.customerName || '').toLowerCase();
+          const email = (o.email || '').toLowerCase();
+          const contact = (o.contactNumber || '').toLowerCase();
+          const items = (Array.isArray(o.items) ? o.items.map(i => i.snackName || '').join(' ') : '').toLowerCase();
+          return customer.includes(q) || email.includes(q) || contact.includes(q) || items.includes(q);
+        });
+      }
+      renderOrders(filteredOrders);
+    }
+
+    // ======= Helpers =======
+    function escapeHtml(s){
+      if(!s) return '';
+      return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    // ======= load everything and start polling =======
+    async function reloadAllData(silent=false){
+      await loadProducts();   // load product price map first
+      await fetchOrders({ silent });
+    }
+
+    // initial load
+    reloadAllData(true);
+
+    // manual refresh button
+    document.getElementById('refreshBtn').addEventListener('click', () => reloadAllData(false));
+
+    // manage products button
+    document.getElementById('manageProductsBtn').addEventListener('click', () => {
+      // route to your product management UI; adjust path if different
+      window.location.href = '/admin/products.html' || '/product-management.html';
+    });
+
+    // logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await fetch('/perform_logout', { method: 'POST', credentials: 'same-origin' });
+      } catch(e){}
+      window.location.href = '/';
+    });
+
+    // poll for new orders
+    setInterval(async () => {
+      await loadProducts();  // refresh prices occasionally
+      await fetchOrders({ silent:true });
+    }, POLL_INTERVAL_MS);
+</script>
+</body>
+</html>

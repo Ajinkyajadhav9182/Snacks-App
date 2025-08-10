@@ -27,6 +27,29 @@
           align-items: center;
         }
 
+        /* Top Navigation */
+        .top-nav {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+        }
+
+        .btn-login {
+          background-color: #3b82f6;
+          color: white;
+          font-weight: bold;
+          padding: 0.6rem 1.2rem;
+          border: none;
+          border-radius: 8px;
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: background-color 0.3s ease;
+        }
+
+        .btn-login:hover {
+          background-color: #2563eb;
+        }
+
         .overlay {
           background: rgba(0, 0, 0, 0.55);
           padding: 3rem;
@@ -75,6 +98,11 @@
 </head>
 <body>
 <div class="hero">
+    <!-- Top right login button -->
+    <div class="top-nav">
+        <a href="/login.html" class="btn-login">Admin Login</a>
+    </div>
+
     <div class="overlay">
         <h1>Welcome to Govinda Snacks</h1>
         <p>Your favorite snacks, delivered fresh & fast.</p>

@@ -2,6 +2,7 @@ package Govinda.Snack.controller;
 
 import Govinda.Snack.model.Order;
 import Govinda.Snack.model.SnackProduct;
+import Govinda.Snack.model.dto.OrderDashboardDTO;
 import Govinda.Snack.service.AdminOrderService;
 import Govinda.Snack.service.SnackProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class AdminOrderController {
     private SnackProductService productService;
 
     @GetMapping("/orders")
-    public List<Order> getAllOrders() {
+    public List<OrderDashboardDTO> getAllOrders() {
         return service.getAllOrders();
     }
 
