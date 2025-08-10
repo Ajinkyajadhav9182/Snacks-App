@@ -73,8 +73,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    public void deleteOrder(String id) {
-        adminRepo.deleteById(id);
+    public void deleteOrders(List<String> ids) {
+        adminRepo.deleteAllById(ids);
     }
 
     @Override

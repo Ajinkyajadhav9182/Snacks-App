@@ -28,8 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
     // In-memory admin user for testing
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails adminUser = User.withUsername("admin")
-                .password("{noop}password123") // {noop} for plain-text (dev only)
+        UserDetails adminUser = User.withUsername("sunil")
+                .password("{noop}SunilDeshmukh@6969") // {noop} for plain-text (dev only)
                 .roles("ADMIN")
                 .build();
         return new InMemoryUserDetailsManager(adminUser);

@@ -41,9 +41,9 @@ public class AdminOrderController {
         return service.markAsDelivered(id);
     }
 
-    @DeleteMapping("/orders/{id}")
-    public void deleteOrder(@PathVariable String id) {
-        service.deleteOrder(id);
+    @DeleteMapping("/orders")
+    public void deleteOrders(@RequestBody List<String> ids) {
+        service.deleteOrders(ids);
     }
 
     @PostMapping("/products")

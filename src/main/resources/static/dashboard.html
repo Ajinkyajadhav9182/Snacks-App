@@ -7,14 +7,13 @@
     <link rel="icon" href="/favicon.ico" />
     <style>
         :root{
-          --bg: #0f172a;           /* deep navy */
-          --panel: #0b1220;        /* darker panel */
+          --bg: #0f172a;
           --muted: #94a3b8;
           --card: #ffffff;
-          --accent: #06b6d4;       /* teal/cyan */
-          --accent-2: #7c3aed;     /* purple */
-          --success: #10b981;      /* green */
-          --danger: #ef4444;       /* red */
+          --accent: #06b6d4;
+          --accent-2: #7c3aed;
+          --success: #10b981;
+          --danger: #ef4444;
           --glass: rgba(255,255,255,0.06);
         }
         *{box-sizing:border-box}
@@ -39,7 +38,6 @@
           border-bottom-right-radius:12px;
           box-shadow: 0 6px 18px rgba(12, 18, 36, 0.12);
         }
-
         header h1 { margin:0; font-size:1.25rem; letter-spacing: -0.2px; }
         .header-actions { display:flex; gap:.6rem; align-items:center; }
 
@@ -63,6 +61,15 @@
           background: transparent;
           border: 1px solid rgba(255,255,255,0.12);
         }
+        .btn.danger {
+          background: var(--danger);
+          color: white;
+        }
+        .btn.danger:disabled {
+          background:#e6eef2;
+          color:#94a3b8;
+          cursor:not-allowed;
+        }
 
         main.container {
           max-width: 1200px;
@@ -76,39 +83,67 @@
           gap:1rem;
           align-items:center;
           margin-bottom: .75rem;
+          flex-wrap: wrap;
+        }
+
+        .bulk-actions {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+          margin-bottom: 0.75rem;
+          padding: 0.5rem;
+          background: rgba(239, 68, 68, 0.08);
+          border-radius: 8px;
+          display: none;
+          flex-wrap: wrap;
+        }
+
+        .bulk-actions.active {
+          display: flex;
         }
 
         .search {
           display:flex;
           gap: .5rem;
           align-items:center;
+          flex-grow: 1;
+          min-width: 220px;
+          max-width: 350px;
         }
         .search input {
           padding: .55rem .75rem;
           border-radius: 8px;
           border: 1px solid #e6edf3;
-          min-width:220px;
+          width: 100%;
+          box-sizing: border-box;
         }
 
-        /* grid of cards */
+        .filters { display:flex; gap:.5rem; align-items:center; }
+
         .grid {
           display:grid;
           grid-template-columns: repeat(1, minmax(0,1fr));
           gap: 1rem;
         }
-        @media(min-width:720px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
-        @media(min-width:1100px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+        @media(min-width:720px){
+          .grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        }
+        @media(min-width:1100px){
+          .grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+        }
 
         .card {
           background: linear-gradient(180deg, white, #fbfdff);
           border-radius: 12px;
-          padding: 1rem;
+          padding: 1rem 1.5rem 1rem 2.8rem;
           box-shadow: 0 6px 18px rgba(12,18,36,0.06);
           display:flex;
           flex-direction:column;
           gap:.6rem;
           transition: transform .12s ease, box-shadow .12s ease;
           min-height: 140px;
+          position: relative;
+          word-break: break-word;
         }
         .card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(12,18,36,0.09); }
 
@@ -117,13 +152,22 @@
           justify-content:space-between;
           align-items:center;
           gap:.5rem;
+          flex-wrap: wrap;
         }
-
         .cust {
           font-weight:700;
           color:#0b1220;
+          word-break: break-word;
+          flex: 1 1 auto;
+          min-width: 0;
         }
-        .meta { color: var(--muted); font-size: .9rem }
+        .meta {
+          color: var(--muted);
+          font-size: .9rem;
+          flex: 1 1 auto;
+          word-break: break-word;
+          min-width: 0;
+        }
 
         .items {
           margin-top: .4rem;
@@ -142,7 +186,12 @@
           align-items:center;
         }
         .item-name { color:#0b1220; }
-        .item-qty { color: #374151; font-size:.9rem; margin-left:.6rem; }
+        .item-qty {
+          color: #374151;
+          font-size:.9rem;
+          margin-left:.6rem;
+          white-space: nowrap;
+        }
 
         .card-foot {
           margin-top:auto;
@@ -150,13 +199,22 @@
           justify-content:space-between;
           align-items:center;
           gap: .5rem;
+          flex-wrap: wrap;
         }
-        .total { font-weight:800; color: var(--success); font-size:1rem; }
+        .total {
+          font-weight:800;
+          color: var(--success);
+          font-size:1rem;
+          white-space: nowrap;
+          flex: 1 0 auto;
+        }
         .status {
           padding: .25rem .5rem;
           border-radius: 999px;
           font-weight:700;
           font-size:.85rem;
+          white-space: nowrap;
+          flex: 0 0 auto;
         }
         .status.pending { background: rgba(99,102,241,0.12); color:#4f46e5; }
         .status.done { background: rgba(16,185,129,0.12); color:#059669; }
@@ -168,11 +226,23 @@
           cursor:pointer;
           font-weight:700;
           font-size:.9rem;
+          white-space: nowrap;
+          flex: 0 0 auto;
         }
         .small-btn.deliver { background: var(--success); color:white; }
         .small-btn.disabled { background:#e6eef2; color:#94a3b8; cursor:not-allowed; }
 
-        /* toast */
+        .bulk-select-checkbox {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+          z-index: 1;
+          flex-shrink: 0;
+        }
+
         .toast-container {
           position: fixed;
           right: 1rem;
@@ -181,6 +251,8 @@
           display:flex;
           flex-direction:column;
           gap:.5rem;
+          max-width: 300px;
+          width: 100%;
         }
         .toast {
           background: rgba(15,23,42,0.95);
@@ -193,11 +265,11 @@
           gap:.6rem;
           align-items:center;
           font-weight:600;
+          word-break: break-word;
         }
         .toast.success { background: linear-gradient(90deg, #059669, #10b981); }
         .toast.info { background: linear-gradient(90deg, #0ea5e9, #06b6d4); }
 
-        /* empty state */
         .empty {
           padding:2rem;
           text-align:center;
@@ -205,16 +277,116 @@
           border-radius: 10px;
           background: white;
           box-shadow: 0 6px 14px rgba(12,18,36,0.04);
+          font-size: 1.1rem;
+        }
+
+        .modal-backdrop {
+          position: fixed;
+          inset:0;
+          background: rgba(2,6,23,0.45);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          z-index:10000;
+          overflow-y: auto;
+          padding: 1rem;
+        }
+        .modal-card {
+          width: 92%;
+          max-width:720px;
+          background:white;
+          border-radius:12px;
+          box-shadow: 0 20px 60px rgba(2,6,23,0.35);
+          padding:1rem 1.25rem;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+        .modal-header {
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:.5rem;
+          margin-bottom:.5rem;
+          flex-wrap: wrap;
+        }
+        .modal-title { font-weight:800; font-size:1.05rem; }
+        .modal-close { background:transparent; border:0; font-size:1.25rem; cursor:pointer; }
+        .modal-body { max-height:60vh; overflow:auto; padding: .5rem 0; color:#111827; }
+        .modal-footer { display:flex; justify-content:flex-end; gap:.5rem; margin-top:.5rem; flex-wrap: wrap; }
+
+        .confirmation-modal .modal-body {
+          padding: 1rem 0;
+        }
+
+        .muted { color:var(--muted); font-size:.92rem; }
+        .chip { padding:.2rem .5rem; border-radius:999px; background:#eef2ff; font-weight:700; color:#0b1220; font-size:.85rem; }
+
+        @media (max-width: 960px) {
+          .actions-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+          .search {
+            max-width: 100%;
+            width: 100%;
+          }
+          .filters {
+            justify-content: flex-start;
+          }
+        }
+
+        @media (max-width: 600px) {
+          header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+          }
+          header h1 {
+            font-size: 1.1rem;
+            word-break: break-word;
+          }
+          .header-actions {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+          }
+          .btn {
+            font-size: 0.9rem;
+            padding: 0.45rem 0.7rem;
+          }
+          main.container {
+            padding: 0 0.75rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .card-foot {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.4rem;
+          }
+          .card-head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.4rem;
+          }
+          .small-btn {
+            width: 100%;
+            text-align: center;
+          }
         }
     </style>
 </head>
 <body>
 <header>
-    <div style="display:flex;gap:1rem;align-items:center">
-        <img src="/favicon.ico" alt="logo" style="width:36px;height:36px;border-radius:8px;background:white;padding:4px"/>
-        <div>
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap: wrap;">
+        <img src="/favicon.ico" alt="logo" style="width:36px;height:36px;border-radius:8px;background:white;padding:4px;flex-shrink: 0;"/>
+        <div style="min-width: 0;">
             <h1>Govinda Snacks — Admin</h1>
-            <div style="font-size:.85rem;opacity:0.9">Orders & Product Management</div>
+            <div style="font-size:.85rem;opacity:0.9;white-space: normal;">Orders & Product Management</div>
         </div>
     </div>
 
@@ -227,123 +399,183 @@
 
 <main class="container">
     <div class="actions-row">
-        <div style="display:flex;gap:.75rem;align-items:center">
-            <div style="font-weight:700">Orders</div>
-            <div style="color:var(--muted)">(Realtime)</div>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap: wrap;">
+            <div style="font-weight:700; white-space: nowrap;">Orders</div>
+            <div style="color:var(--muted); white-space: nowrap;">(Realtime)</div>
+            <div class="filters" title="Filter delivered/not delivered" style="flex-wrap: nowrap;">
+                <label style="display:flex;align-items:center;gap:.4rem;white-space: nowrap;">
+                    <input type="checkbox" id="showDeliveredToggle" /> <span class="muted">Show Delivered</span>
+                </label>
+            </div>
         </div>
 
         <div class="search">
-            <input id="searchInput" placeholder="Search by customer, item or contact..." />
+            <input id="searchInput" type="search" autocomplete="off" placeholder="Search by customer, item or contact..." />
         </div>
     </div>
 
+    <div class="bulk-actions" id="bulkActions" aria-live="polite" aria-atomic="true">
+        <div style="font-weight: 600; color: var(--danger);">
+            <span id="selectedCount">0</span> selected
+        </div>
+        <button class="btn danger" id="deleteSelectedBtn" type="button">Delete Selected Orders</button>
+        <button class="btn ghost" id="clearSelectionBtn" type="button">Clear Selection</button>
+    </div>
+
     <div id="ordersWrap">
-        <div id="ordersGrid" class="grid"></div>
-        <div id="emptyState" class="empty" style="display:none;margin-top:1rem;">
+        <div id="ordersGrid" class="grid" role="list" aria-label="Orders list"></div>
+        <div id="emptyState" class="empty" style="display:none;margin-top:1rem;" role="alert" aria-live="assertive">
             No orders yet.
         </div>
     </div>
 </main>
 
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<div id="orderModalBackdrop" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card" role="document">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">Order Details</div>
+            <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body" id="orderDetailsContent" tabindex="0"></div>
+        <div class="modal-footer">
+            <button class="btn ghost" id="modalCloseBtn2" type="button">Close</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmDeleteModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-card confirmation-modal" role="document">
+        <div class="modal-header">
+            <div class="modal-title" id="confirmModalTitle">Confirm Delete</div>
+            <button class="modal-close" id="confirmModalCloseBtn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body" id="confirmModalBody" style="padding: 1rem 0;">
+            Are you sure you want to delete <span id="deleteCount">0</span> selected orders? This action cannot be undone.
+        </div>
+        <div class="modal-footer">
+            <button class="btn ghost" id="confirmModalCancelBtn" type="button">Cancel</button>
+            <button class="btn danger" id="confirmModalDeleteBtn" type="button">Delete Orders</button>
+        </div>
+    </div>
+</div>
 
 <script>
-    // ======= CONFIG =======
-    const ORDERS_API = '/api/admin/orders';         // GET
-    const PRODUCTS_API = '/api/admin/products';     // GET
-    const DELIVER_API_TEMPLATE = id => `/api/admin/orders/${id}/deliver`; // PUT
-    const POLL_INTERVAL_MS = 8000;
+    const ORDERS_API = '/api/admin/orders';
+    const PRODUCTS_API = '/api/admin/products';
+    const DELIVER_API_TEMPLATE = id => `/api/admin/orders/${id}/deliver`;
+    const DELETE_ORDERS_API = '/api/admin/orders';
+    const POLL_INTERVAL_MS = 15000;
+    const PRODUCTS_REFRESH_MS = 60000;
+    const FAILURE_BACKOFF_MULT = 2;
+    const MAX_BACKOFF_MS = 5 * 60 * 1000;
 
-    // ======= STATE =======
-    let orders = [];              // array of order objects from backend
-    let productsMap = new Map();  // snackName -> price (number)
-    let knownOrderIds = new Set(); // to detect new orders
-    let filteredOrders = [];      // after search
+    let orders = [];
+    let productsMap = new Map();
+    let knownOrderIds = new Set();
+    let filteredOrders = [];
+    let lastProductsLoad = 0;
+    let pollTimer = null;
+    let pollInterval = POLL_INTERVAL_MS;
+    let isFetching = false;
+    let selectedOrderIds = new Set();
 
-    // ======= UTIL: Toasts =======
+    function escapeHtml(s){
+      if(!s && s !== 0) return '';
+      return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
     const toastContainer = document.getElementById('toastContainer');
     function showToast(message, type='info', timeout=4500){
       const el = document.createElement('div');
       el.className = `toast ${type==='success' ? 'success' : 'info'}`;
       el.innerText = message;
       toastContainer.prepend(el);
-      setTimeout(()=> {
-        try{ el.style.opacity='0'; el.remove(); }catch(e){}
+      setTimeout(() => {
+        try { el.style.opacity='0'; el.remove(); } catch(e){}
       }, timeout);
     }
 
-    // ======= FETCH PRODUCTS (for price lookup) =======
-    async function loadProducts(){
-      try{
+    async function loadProducts(force=false){
+      const now = Date.now();
+      if(!force && (now - lastProductsLoad) < PRODUCTS_REFRESH_MS) return;
+      try {
         const res = await fetch(PRODUCTS_API, { credentials: 'same-origin' });
-        if(!res.ok) throw new Error('Failed to load products');
+        if(!res.ok) throw new Error('Failed to load products: ' + res.status);
         const list = await res.json();
         productsMap.clear();
         list.forEach(p => {
-          if(p && p.name) productsMap.set(p.name.toLowerCase(), Number(p.price));
+          if(p && p.name) productsMap.set(String(p.name).toLowerCase(), Number(p.price));
         });
-      }catch(err){
-        // keep productsMap maybe stale; not fatal
+        lastProductsLoad = Date.now();
+      } catch(err) {
         console.error('Products load error', err);
       }
     }
 
-    // ======= FETCH ORDERS =======
     async function fetchOrders({ silent=false } = {}){
-      try{
+      if(isFetching) return;
+      isFetching = true;
+      try {
         const res = await fetch(ORDERS_API, { credentials: 'same-origin' });
-        if(!res.ok){
-          console.error('Failed to fetch orders', res.status);
+        if(!res.ok) {
           if(!silent) showToast('Failed to fetch orders', 'info');
-          return;
+          throw new Error('Fetch orders failed: ' + res.status);
         }
         const data = await res.json();
-        // Expecting an array. Normalize empty.
         const list = Array.isArray(data) ? data : (data ? [data] : []);
-        // detect new orders
         const newOrders = list.filter(o => !knownOrderIds.has(o.id));
-        if(newOrders.length > 0){
+        if(newOrders.length > 0) {
           newOrders.forEach(n => {
-            // create friendly message (use customerName or email)
             const who = n.customerName || n.email || 'a customer';
             showToast(`New order from ${who}`, 'success', 4500);
             knownOrderIds.add(n.id);
           });
         }
-        // update knownOrderIds set to contain all current ids
         knownOrderIds = new Set(list.map(o => o.id));
-
         orders = list;
+        pollInterval = POLL_INTERVAL_MS;
         applySearchAndRender();
-      }catch(err){
+      } catch(err) {
         console.error('fetchOrders error', err);
         if(!silent) showToast('Could not load orders', 'info');
+        pollInterval = Math.min(pollInterval * FAILURE_BACKOFF_MULT, MAX_BACKOFF_MS);
+      } finally {
+        isFetching = false;
       }
     }
 
-    // ======= Compute item price helper =======
     function lookupPrice(snackName){
       if(!snackName) return undefined;
       const p = productsMap.get(String(snackName).toLowerCase());
-      return (p === undefined) ? undefined : Number(p);
+      return p === undefined ? undefined : Number(p);
     }
 
-    // ======= Render =======
     const grid = document.getElementById('ordersGrid');
     function renderOrders(list){
       grid.innerHTML = '';
       if(!list || list.length === 0){
         document.getElementById('emptyState').style.display = 'block';
         return;
-      } else {
-        document.getElementById('emptyState').style.display = 'none';
       }
+      document.getElementById('emptyState').style.display = 'none';
 
       list.forEach(order => {
         const card = document.createElement('article');
         card.className = 'card';
 
-        // Header
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'bulk-select-checkbox';
+        checkbox.setAttribute('data-order-id', order.id);
+        checkbox.addEventListener('change', e => {
+          if(e.target.checked) selectedOrderIds.add(order.id);
+          else selectedOrderIds.delete(order.id);
+          updateBulkActionsUI();
+        });
+        card.appendChild(checkbox);
+
         const head = document.createElement('div');
         head.className = 'card-head';
         const left = document.createElement('div');
@@ -351,7 +583,6 @@
                           <div class="meta">${escapeHtml(order.email || '')} • ${escapeHtml(order.contactNumber || '')}</div>`;
         head.appendChild(left);
 
-        // Right side small meta
         const right = document.createElement('div');
         const statusEl = document.createElement('div');
         statusEl.className = 'status ' + (order.delivered ? 'done' : 'pending');
@@ -360,28 +591,20 @@
         head.appendChild(right);
         card.appendChild(head);
 
-        // Items block
         const itemsWrap = document.createElement('div');
         itemsWrap.className = 'items';
-        if(Array.isArray(order.items) && order.items.length>0){
+        if(Array.isArray(order.items) && order.items.length > 0){
           order.items.forEach(it => {
             const row = document.createElement('div');
             row.className = 'item-row';
 
             const nameSpan = document.createElement('div');
             nameSpan.className = 'item-name';
-            // show snackName and quantity
             nameSpan.innerText = `${it.snackName || 'Item'} (${it.quantity || 0})`;
 
             const rightSpan = document.createElement('div');
             const price = lookupPrice(it.snackName);
-            // Show price only if available (avoid "undefined")
-            if(price !== undefined && !Number.isNaN(price)){
-              rightSpan.innerText = `₹${(price * (it.quantity || 0)).toFixed(2)}`;
-            } else {
-              rightSpan.innerText = ''; // omit price if not found
-            }
-
+            rightSpan.innerText = (price !== undefined && !Number.isNaN(price)) ? `₹${(price * (it.quantity || 0)).toFixed(2)}` : '';
             row.appendChild(nameSpan);
             row.appendChild(rightSpan);
             itemsWrap.appendChild(row);
@@ -391,16 +614,13 @@
         }
         card.appendChild(itemsWrap);
 
-        // Footer: total, actions
         const foot = document.createElement('div');
         foot.className = 'card-foot';
 
-        // total: prefer backend totalAmount if present otherwise compute from product map
         let totalAmount = null;
         if(typeof order.totalAmount === 'number' && !Number.isNaN(order.totalAmount)){
           totalAmount = order.totalAmount;
         } else {
-          // compute from product prices we have
           totalAmount = 0;
           if(Array.isArray(order.items)){
             order.items.forEach(it => {
@@ -414,11 +634,10 @@
         totalEl.innerText = (totalAmount && totalAmount > 0) ? `₹${totalAmount.toFixed(2)}` : '—';
         foot.appendChild(totalEl);
 
-        // actions
         const actions = document.createElement('div');
         actions.style.display = 'flex';
         actions.style.gap = '.5rem';
-        // delivered button
+
         const deliverBtn = document.createElement('button');
         deliverBtn.className = 'small-btn deliver';
         deliverBtn.innerText = order.delivered ? 'Delivered' : 'Mark Delivered';
@@ -429,12 +648,12 @@
           deliverBtn.onclick = async () => {
             deliverBtn.disabled = true;
             deliverBtn.classList.add('disabled');
-            try{
+            try {
               const resp = await fetch(DELIVER_API_TEMPLATE(order.id), { method: 'PUT', credentials: 'same-origin' });
               if(!resp.ok) throw new Error('Failed');
               showToast('Order marked delivered', 'success', 2500);
               await reloadAllData(true);
-            }catch(err){
+            } catch(err) {
               console.error(err);
               showToast('Could not mark delivered', 'info', 3000);
               deliverBtn.disabled = false;
@@ -444,81 +663,187 @@
         }
         actions.appendChild(deliverBtn);
 
-        // view details button (optional)
         const viewBtn = document.createElement('button');
         viewBtn.className = 'small-btn';
         viewBtn.innerText = 'View';
-        viewBtn.onclick = () => {
-          // open a simple modal-like detail (for now, open native alert)
-          const itemsText = Array.isArray(order.items)? order.items.map(i => `${i.snackName} (${i.quantity})`).join('\\n') : '';
-          alert(`Order: ${order.customerName}\\nContact: ${order.contactNumber}\\nAddress: ${order.address}\\n\\nItems:\\n${itemsText}`);
-        };
+        viewBtn.setAttribute('data-order-id', order.id);
+        viewBtn.onclick = () => openOrderModal(order);
         actions.appendChild(viewBtn);
 
         foot.appendChild(actions);
         card.appendChild(foot);
-
         grid.appendChild(card);
+      });
+
+      updateCheckboxStates();
+    }
+
+    function updateCheckboxStates() {
+      document.querySelectorAll('.bulk-select-checkbox').forEach(checkbox => {
+        const orderId = checkbox.getAttribute('data-order-id');
+        checkbox.checked = selectedOrderIds.has(orderId);
       });
     }
 
-    // ======= Search & filter =======
+    function updateBulkActionsUI() {
+      const bulkActions = document.getElementById('bulkActions');
+      const selectedCount = document.getElementById('selectedCount');
+      selectedCount.textContent = selectedOrderIds.size;
+      if(selectedOrderIds.size > 0) bulkActions.classList.add('active');
+      else bulkActions.classList.remove('active');
+    }
+
+    async function deleteSelectedOrders() {
+      if(selectedOrderIds.size === 0) return;
+      try {
+        document.getElementById('deleteCount').textContent = selectedOrderIds.size;
+        const confirmModal = document.getElementById('confirmDeleteModal');
+        confirmModal.style.display = 'flex';
+        const confirmed = await new Promise(resolve => {
+          const confirmBtn = document.getElementById('confirmModalDeleteBtn');
+          const cancelBtn = document.getElementById('confirmModalCancelBtn');
+          const closeBtn = document.getElementById('confirmModalCloseBtn');
+          const cleanup = () => {
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+            closeBtn.onclick = null;
+            confirmModal.style.display = 'none';
+          };
+          confirmBtn.onclick = () => { cleanup(); resolve(true); };
+          cancelBtn.onclick = () => { cleanup(); resolve(false); };
+          closeBtn.onclick = () => { cleanup(); resolve(false); };
+        });
+        if(!confirmed) return;
+        const ids = Array.from(selectedOrderIds);
+        const response = await fetch(DELETE_ORDERS_API, {
+          method: 'DELETE',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(ids),
+          credentials: 'same-origin'
+        });
+        if(!response.ok) throw new Error('Failed to delete orders');
+        showToast(`Deleted ${ids.length} order(s)`, 'success');
+        selectedOrderIds.clear();
+        updateBulkActionsUI();
+        await reloadAllData(true);
+      } catch(error) {
+        console.error('Error deleting orders:', error);
+        showToast('Failed to delete orders', 'info');
+      }
+    }
+
+    const modalBackdrop = document.getElementById('orderModalBackdrop');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalCloseBtn2 = document.getElementById('modalCloseBtn2');
+    const orderDetailsContent = document.getElementById('orderDetailsContent');
+
+    function openOrderModal(order){
+      const itemsHtml = (Array.isArray(order.items) && order.items.length > 0) ?
+        '<ul>' + order.items.map(it => `<li>${escapeHtml(it.snackName)} (${escapeHtml(it.quantity)})${(() => {
+          const price = lookupPrice(it.snackName);
+          return (price !== undefined && !Number.isNaN(price)) ? ` — ₹${(price * (it.quantity||0)).toFixed(2)}` : '';
+        })()}</li>`).join('') + '</ul>' : '<div class="muted">No items recorded</div>';
+      const html = `
+        <div><strong>👤 Name:</strong> ${escapeHtml(order.customerName || '—')}</div>
+        <div><strong>📞 Contact:</strong> ${escapeHtml(order.contactNumber || '—')}</div>
+        <div><strong>🏠 Address:</strong> ${escapeHtml(order.address || '—')}</div>
+        <hr/>
+        <div><strong>🛒 Items</strong></div>
+        ${itemsHtml}
+        <hr/>
+        <div><strong>Total:</strong> ${(typeof order.totalAmount === 'number' && !Number.isNaN(order.totalAmount)) ? '₹' + order.totalAmount.toFixed(2) : (computeTotal(order) > 0 ? '₹' + computeTotal(order).toFixed(2) : '—')}</div>
+        <div style="margin-top:.5rem"><span class="chip">${order.delivered ? 'Delivered' : 'Pending'}</span></div>
+      `;
+      orderDetailsContent.innerHTML = html;
+      modalBackdrop.style.display = 'flex';
+    }
+
+    function closeOrderModal(){
+      modalBackdrop.style.display = 'none';
+      orderDetailsContent.innerHTML = '';
+    }
+
+    modalCloseBtn.addEventListener('click', closeOrderModal);
+    modalCloseBtn2.addEventListener('click', closeOrderModal);
+    modalBackdrop.addEventListener('click', e => { if(e.target === modalBackdrop) closeOrderModal(); });
+
+    function computeTotal(order){
+      let total = 0;
+      if(!Array.isArray(order.items)) return total;
+      order.items.forEach(it => {
+        const p = lookupPrice(it.snackName);
+        if(p !== undefined && !Number.isNaN(p)) total += p * (it.quantity || 0);
+      });
+      return total;
+    }
+
     const searchInput = document.getElementById('searchInput');
+    const showDeliveredToggle = document.getElementById('showDeliveredToggle');
+
     searchInput.addEventListener('input', () => applySearchAndRender());
+    showDeliveredToggle.addEventListener('change', () => applySearchAndRender());
 
     function applySearchAndRender(){
       const q = String(searchInput.value || '').trim().toLowerCase();
-      if(!q){
-        filteredOrders = orders.slice();
-      } else {
-        filteredOrders = orders.filter(o => {
-          const customer = (o.customerName || '').toLowerCase();
-          const email = (o.email || '').toLowerCase();
-          const contact = (o.contactNumber || '').toLowerCase();
-          const items = (Array.isArray(o.items) ? o.items.map(i => i.snackName || '').join(' ') : '').toLowerCase();
-          return customer.includes(q) || email.includes(q) || contact.includes(q) || items.includes(q);
-        });
-      }
+      const desiredDelivered = showDeliveredToggle.checked;
+      filteredOrders = orders.filter(o => {
+        if(Boolean(o.delivered) !== desiredDelivered) return false;
+        if(!q) return true;
+        const customer = (o.customerName || '').toLowerCase();
+        const email = (o.email || '').toLowerCase();
+        const contact = (o.contactNumber || '').toLowerCase();
+        const items = (Array.isArray(o.items) ? o.items.map(i => i.snackName || '').join(' ') : '').toLowerCase();
+        return customer.includes(q) || email.includes(q) || contact.includes(q) || items.includes(q);
+      });
       renderOrders(filteredOrders);
     }
 
-    // ======= Helpers =======
-    function escapeHtml(s){
-      if(!s) return '';
-      return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    }
-
-    // ======= load everything and start polling =======
     async function reloadAllData(silent=false){
-      await loadProducts();   // load product price map first
+      await loadProducts();
       await fetchOrders({ silent });
     }
 
-    // initial load
-    reloadAllData(true);
+    (async () => {
+      showDeliveredToggle.checked = false;
+      await reloadAllData(true);
+      schedulePolling();
+    })();
 
-    // manual refresh button
-    document.getElementById('refreshBtn').addEventListener('click', () => reloadAllData(false));
-
-    // manage products button
+    document.getElementById('refreshBtn').addEventListener('click', () => { pollInterval = POLL_INTERVAL_MS; reloadAllData(false); });
     document.getElementById('manageProductsBtn').addEventListener('click', () => {
-      // route to your product management UI; adjust path if different
-      window.location.href = '/admin/products.html' || '/product-management.html';
+      window.location.href = '/products.html';
     });
-
-    // logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        await fetch('/perform_logout', { method: 'POST', credentials: 'same-origin' });
-      } catch(e){}
+      try { await fetch('/perform_logout', { method: 'POST', credentials: 'same-origin' }); } catch(e) {}
       window.location.href = '/';
     });
 
-    // poll for new orders
-    setInterval(async () => {
-      await loadProducts();  // refresh prices occasionally
-      await fetchOrders({ silent:true });
-    }, POLL_INTERVAL_MS);
+    document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedOrders);
+    document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+      selectedOrderIds.clear();
+      updateBulkActionsUI();
+      updateCheckboxStates();
+    });
+
+    function schedulePolling(){
+      if(pollTimer) clearTimeout(pollTimer);
+      pollTimer = setTimeout(async () => {
+        await reloadAllData(true);
+        schedulePolling();
+      }, pollInterval);
+    }
+
+    window.markDeliveredAndRefresh = async function(orderId){
+      try{
+        const resp = await fetch(DELIVER_API_TEMPLATE(orderId), { method: 'PUT', credentials: 'same-origin' });
+        if(!resp.ok) throw new Error('Failed to mark delivered');
+        showToast('Order marked delivered', 'success', 2200);
+        await reloadAllData(true);
+      }catch(err){
+        console.error(err);
+        showToast('Could not mark delivered', 'info', 3000);
+      }
+    }
 </script>
 </body>
 </html>

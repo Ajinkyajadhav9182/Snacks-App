@@ -1,148 +1,344 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Place Order - Govinda Snacks</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Place Order — Govinda Snacks</title>
+    <link rel="icon" href="/favicon.ico" />
     <style>
+        :root {
+          --bg: #0f172a;
+          --muted: #94a3b8;
+          --card: #ffffff;
+          --accent: #06b6d4;
+          --accent-2: #7c3aed;
+          --success: #10b981;
+          --danger: #ef4444;
+          --glass: rgba(255,255,255,0.06);
+        }
+        * {
+          box-sizing: border-box;
+        }
         body {
-          font-family: Arial, sans-serif;
           margin: 0;
-          height: 100%;
-          background: url('/assets/background.jpg') no-repeat center center fixed;
-          background-size: cover;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+          color: #0f172a;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          min-height: 100vh;
+          overflow-x: hidden; /* prevent horizontal scroll */
         }
 
-        .overlay {
-          background-color: (255, 255, 255, 0.7);
-          min-height: 100vh;
-          padding: 2rem;
-          backdrop-filter: blur(2px);
-          overflow-x: hidden;
-          overflow-y: auto;
+        /* Container full width with some padding */
+        .container {
+          max-width: 100vw;
+          padding: 2rem 2rem;
+          margin: 0 auto;
+        }
+
+        header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .logo {
+          width: 80px;
+          height: 80px;
+          margin: 0 auto 1rem;
+          border-radius: 12px;
+          background: white;
+          padding: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         h1 {
-          text-align: center;
-          color: red;
-          margin-bottom: 1rem;
+          font-size: 1.75rem;
+          color: var(--accent-2);
+          margin-bottom: 0.5rem;
         }
 
-        form {
-          max-width: 600px;
-          margin: auto;
+        .subtitle {
+          color: var(--muted);
+          font-size: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .order-card {
           background: white;
+          border-radius: 12px;
           padding: 2rem;
-          border-radius: 8px;
-          box-shadow: 0 0 15px rgba(0,0,0,0.15);
+          box-shadow: 0 6px 18px rgba(12,18,36,0.08);
+
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1.5rem 2rem;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+
+        /* Horizontal form groups: 2 per row on wide screens */
+        .form-group {
+          flex: 1 1 calc(50% - 2rem);
+          min-width: 250px;
+          display: flex;
+          flex-direction: column;
         }
 
         label {
-          display: block;
-          margin-top: 1rem;
-          font-weight: bold;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #475569;
         }
 
-        input, select {
+        .form-control {
+          padding: 0.75rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 1rem;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
           width: 100%;
-          padding: 0.5rem;
-          margin-top: 0.3rem;
-          border: 1px solid #d1d5db;
-          border-radius: 4px;
+        }
+
+        .form-control:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(6,182,212,0.1);
         }
 
         .error {
-          border-color: red;
+          border-color: var(--danger);
         }
 
         .error-message {
-          color: red;
+          color: var(--danger);
           font-size: 0.85rem;
-          margin-top: 0.2rem;
+          margin-top: 0.25rem;
+          min-height: 1.2em; /* reserve space */
         }
 
-        .items {
+        /* Items container full width below form groups */
+        .items-container {
+          flex-basis: 100%;
           margin-top: 1rem;
+          border-top: 1px solid #e2e8f0;
+          padding-top: 1.5rem;
         }
 
+        .items-container > label {
+          font-size: 1.1rem;
+          margin-bottom: 1rem;
+          display: block;
+        }
+
+        /* Each item-row inline horizontally with gap */
         .item-row {
           display: flex;
           gap: 1rem;
-          margin-top: 0.5rem;
+          margin-bottom: 1rem;
+          align-items: center;
+          flex-wrap: nowrap;
         }
 
-        .item-row input,
-        .item-row select {
+        .item-row select,
+        .item-row input {
           flex: 1;
+          min-width: 120px;
         }
 
-        .total {
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          user-select: none;
+        }
+
+        .btn-primary {
+          background: linear-gradient(90deg, var(--accent), var(--accent-2));
+          color: white;
+          border: none;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(124,58,237,0.2);
+        }
+
+        .btn-secondary {
+          background: white;
+          color: var(--accent-2);
+          border: 1px solid var(--accent-2);
+        }
+
+        .btn-secondary:hover {
+          background: #f5f3ff;
+        }
+
+        .total-price {
+          flex-basis: 100%;
           text-align: right;
-          margin-top: 1rem;
-          font-weight: bold;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--success);
+          margin: 1.5rem 0 0 0;
         }
 
         .submit-container {
-          display: flex;
-          justify-content: center;
+          flex-basis: 100%;
+          text-align: center;
+          margin-top: 2rem;
         }
 
-        button {
-          margin-top: 1.5rem;
-          background-color: #2563eb;
+        /* Toast notification */
+        .toast {
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: linear-gradient(90deg, var(--success), #10b981);
           color: white;
-          border: none;
-          padding: 0.7rem 1.5rem;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 1rem;
+          padding: 1rem 1.5rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 1000;
+          display: none;
+        }
+
+        /* Responsive for smaller screens */
+        @media (max-width: 850px) {
+          .order-card {
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+          }
+          .form-group {
+            flex: 1 1 100%;
+            min-width: auto;
+          }
+          .items-container {
+            padding-top: 1rem;
+          }
+          .total-price, .submit-container {
+            text-align: center;
+          }
+          .item-row {
+            flex-wrap: wrap;
+          }
+          .item-row select,
+          .item-row input {
+            flex: 1 1 100%;
+            min-width: auto;
+          }
+        }
+
+        @media (max-width: 400px) {
+          body {
+            padding: 0 0.5rem;
+          }
+          .btn {
+            width: 100%;
+          }
         }
     </style>
 </head>
 <body>
-<div class="overlay">
-    <h1>Place Your Order</h1>
-    <form id="orderForm" novalidate>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" />
-        <div class="error-message" id="emailError"></div>
+<div class="container">
+    <header>
+        <img src="/favicon.ico" alt="Govinda Snacks Logo" class="logo" />
+        <h1>Place Your Order</h1>
+        <div class="subtitle">Fill in your details and select snacks</div>
+    </header>
 
-        <label for="customerName">Customer Name</label>
-        <input type="text" id="customerName" name="customerName" />
-        <div class="error-message" id="nameError"></div>
-
-        <label for="contactNumber">Contact Number</label>
-        <input type="text" id="contactNumber" name="contactNumber" />
-        <div class="error-message" id="contactError"></div>
-
-        <label for="address">Address</label>
-        <input type="text" id="address" name="address" />
-        <div class="error-message" id="addressError"></div>
-
-        <div class="items">
-            <label>Snacks</label>
-            <div id="itemList">
-                <!-- Snack items dynamically added -->
+    <div class="order-card">
+        <form id="orderForm" novalidate style="width: 100%;">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-control"
+                        placeholder="your@email.com"
+                />
+                <div class="error-message" id="emailError"></div>
             </div>
-            <button type="button" onclick="addItem()">Add Snack</button>
-        </div>
 
-        <div class="total" id="totalPrice">Total: ₹0</div>
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+                <input
+                        type="text"
+                        id="customerName"
+                        name="customerName"
+                        class="form-control"
+                        placeholder="Your full name"
+                />
+                <div class="error-message" id="nameError"></div>
+            </div>
 
-        <div class="submit-container">
-            <button type="submit">Submit Order</button>
-        </div>
-    </form>
+            <div class="form-group">
+                <label for="contactNumber">Contact Number</label>
+                <input
+                        type="text"
+                        id="contactNumber"
+                        name="contactNumber"
+                        class="form-control"
+                        placeholder="Phone number"
+                />
+                <div class="error-message" id="contactError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        class="form-control"
+                        placeholder="Delivery address"
+                />
+                <div class="error-message" id="addressError"></div>
+            </div>
+
+            <div class="items-container">
+                <label>Order Items</label>
+                <div id="itemList">
+                    <!-- Snack items will be added here -->
+                </div>
+                <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="addItem()"
+                        style="margin-top: 1rem;"
+                >
+                    + Add Another Item
+                </button>
+            </div>
+
+            <div class="total-price" id="totalPrice">Total: ₹0</div>
+
+            <div class="submit-container">
+                <button type="submit" class="btn btn-primary">Submit Order</button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<div class="toast" id="toast">Order placed successfully!</div>
 
 <script>
     let snackOptions = [];
 
     async function fetchSnacks() {
-      const response = await fetch('/api/user/orders/products');
-      const data = await response.json();
-      snackOptions = data;
-      addItem(); // add one item initially
+      try {
+        const response = await fetch('/api/user/orders/products');
+        const data = await response.json();
+        snackOptions = data;
+        addItem(); // Add one item initially
+      } catch (error) {
+        console.error('Error fetching snacks:', error);
+      }
     }
 
     function addItem() {
@@ -150,20 +346,34 @@
       itemDiv.className = 'item-row';
 
       const select = document.createElement('select');
+      select.className = 'form-control';
       select.name = 'snackName';
-      snackOptions.forEach(snack => {
+      select.required = true;
+
+      // Add default option
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Select a snack';
+      defaultOption.disabled = true;
+      defaultOption.selected = true;
+      select.appendChild(defaultOption);
+
+      // Add snack options
+      snackOptions.forEach((snack) => {
         const option = document.createElement('option');
         option.value = snack.name;
-        option.textContent = `${snack.name} - ₹${snack.price}`;
+        option.textContent = `${snack.name} - ₹${snack.price.toFixed(2)}`;
         option.setAttribute('data-price', snack.price);
         select.appendChild(option);
       });
 
       const quantity = document.createElement('input');
       quantity.type = 'number';
+      quantity.className = 'form-control';
       quantity.name = 'quantity';
       quantity.min = 1;
       quantity.value = 1;
+      quantity.required = true;
 
       select.onchange = updateTotal;
       quantity.oninput = updateTotal;
@@ -178,24 +388,26 @@
     function updateTotal() {
       let total = 0;
       const rows = document.querySelectorAll('.item-row');
-      rows.forEach(row => {
+      rows.forEach((row) => {
         const select = row.querySelector('select');
         const quantity = row.querySelector('input');
-        const price = parseFloat(select.selectedOptions[0].getAttribute('data-price'));
-        const qty = parseInt(quantity.value || 0);
-        total += price * qty;
+        if (select.value) {
+          const price = parseFloat(select.selectedOptions[0].getAttribute('data-price'));
+          const qty = parseInt(quantity.value || 0);
+          total += price * qty;
+        }
       });
-      document.getElementById('totalPrice').textContent = `Total: ₹${total}`;
+      document.getElementById('totalPrice').textContent = `Total: ₹${total.toFixed(2)}`;
     }
 
     function validateForm() {
       let valid = true;
 
       const fields = [
-        { id: "email", errorId: "emailError", msg: "Email is required" },
-        { id: "customerName", errorId: "nameError", msg: "Customer name is required" },
-        { id: "contactNumber", errorId: "contactError", msg: "Contact number is required" },
-        { id: "address", errorId: "addressError", msg: "Address is required" }
+        { id: 'email', errorId: 'emailError', msg: 'Please enter a valid email' },
+        { id: 'customerName', errorId: 'nameError', msg: 'Please enter your name' },
+        { id: 'contactNumber', errorId: 'contactError', msg: 'Please enter your contact number' },
+        { id: 'address', errorId: 'addressError', msg: 'Please enter your address' },
       ];
 
       fields.forEach(({ id, errorId, msg }) => {
@@ -211,7 +423,25 @@
         }
       });
 
+      // Validate at least one item is selected
+      const hasItems = Array.from(document.querySelectorAll('.item-row select')).some(
+        (select) => select.value !== ''
+      );
+      if (!hasItems) {
+        valid = false;
+        // Optionally, show an error message for items here
+      }
+
       return valid;
+    }
+
+    async function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
     }
 
     document.getElementById('orderForm').addEventListener('submit', async (e) => {
@@ -224,10 +454,10 @@
         customerName: document.getElementById('customerName').value.trim(),
         contactNumber: document.getElementById('contactNumber').value.trim(),
         address: document.getElementById('address').value.trim(),
-        items: []
+        items: [],
       };
 
-      document.querySelectorAll('.item-row').forEach(row => {
+      document.querySelectorAll('.item-row').forEach((row) => {
         const snackName = row.querySelector('select').value;
         const quantity = parseInt(row.querySelector('input').value || 0);
         if (snackName && quantity > 0) {
@@ -235,18 +465,26 @@
         }
       });
 
-      const response = await fetch('/api/user/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const response = await fetch('/api/user/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-      if (response.ok) {
-        alert('Order placed successfully!');
-        location.reload();
-      } else {
-        const errorData = await response.json();
-        alert('Failed to submit order:\n' + JSON.stringify(errorData, null, 2));
+        if (response.ok) {
+          showToast('Order placed successfully!');
+          setTimeout(() => {
+            window.location.href = '/'; // Redirect to home after success
+          }, 1500);
+        } else {
+          const errorData = await response.json();
+          showToast('Failed to place order. Please try again.');
+          console.error('Order submission error:', errorData);
+        }
+      } catch (error) {
+        showToast('Network error. Please try again.');
+        console.error('Network error:', error);
       }
     });
 
