@@ -50,14 +50,6 @@
           gap: 0.5rem;
         }
 
-        .logo {
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
-          background: white;
-          padding: 4px;
-        }
-
         .header-text h1 {
           margin: 0;
           font-size: 1.1rem;
@@ -303,15 +295,11 @@
 <body>
 <header>
     <div class="header-content">
-        <div class="logo-title">
-            <img src="/favicon.ico" alt="logo" class="logo"/>
             <div class="header-text">
                 <h1>Govinda Snacks — Product Management</h1>
                 <div>Add, edit and manage snack products</div>
-            </div>
         </div>
         <div class="header-actions">
-            <button class="btn" id="refreshBtn" title="Refresh">Refresh</button>
             <button class="btn primary" id="dashboardBtn">Dashboard</button>
             <button class="btn" id="logoutBtn">Logout</button>
         </div>
@@ -536,7 +524,6 @@
 
     function setupEventListeners() {
         document.getElementById('addProductBtn').addEventListener('click', openAddModal);
-        document.getElementById('refreshBtn').addEventListener('click', loadProducts);
         document.getElementById('dashboardBtn').addEventListener('click', () => {
             window.location.href = '/dashboard.html';
         });

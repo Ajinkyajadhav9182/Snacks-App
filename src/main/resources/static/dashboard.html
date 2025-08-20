@@ -194,13 +194,32 @@
         }
 
         .card-foot {
-          margin-top:auto;
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          gap: .5rem;
+          margin-top: auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+        .card-foot > .total {
+          order: 1;
+          flex: 1 1 100%;
+        }
+        .card-foot > div:last-child {
+          order: 2;
+          display: flex;
+          gap: 0.5rem;
+          width: 100%;
           flex-wrap: wrap;
         }
+        .card-foot .small-btn {
+          flex: 1 1 auto;
+          min-width: calc(50% - 0.5rem);
+          box-sizing: border-box;
+          text-align: center;
+        }
+
         .total {
           font-weight:800;
           color: var(--success);
@@ -363,19 +382,20 @@
         }
 
         @media (max-width: 480px) {
-          .card-foot {
+          .card {
+            padding-left: 2.2rem;
+          }
+          .card-foot > div:last-child {
             flex-direction: column;
-            align-items: flex-start;
             gap: 0.4rem;
+          }
+          .card-foot .small-btn {
+            min-width: 100%;
           }
           .card-head {
             flex-direction: column;
             align-items: flex-start;
             gap: 0.4rem;
-          }
-          .small-btn {
-            width: 100%;
-            text-align: center;
           }
         }
     </style>
@@ -383,7 +403,6 @@
 <body>
 <header>
     <div style="display:flex;gap:1rem;align-items:center;flex-wrap: wrap;">
-        <img src="/favicon.ico" alt="logo" style="width:36px;height:36px;border-radius:8px;background:white;padding:4px;flex-shrink: 0;"/>
         <div style="min-width: 0;">
             <h1>Govinda Snacks — Admin</h1>
             <div style="font-size:.85rem;opacity:0.9;white-space: normal;">Orders & Product Management</div>
@@ -391,7 +410,6 @@
     </div>
 
     <div class="header-actions">
-        <button class="btn ghost" id="refreshBtn" title="Refresh orders">Refresh</button>
         <button class="btn" id="manageProductsBtn">Manage Products</button>
         <button class="btn primary" id="logoutBtn">Logout</button>
     </div>
@@ -401,7 +419,6 @@
     <div class="actions-row">
         <div style="display:flex;gap:.75rem;align-items:center;flex-wrap: wrap;">
             <div style="font-weight:700; white-space: nowrap;">Orders</div>
-            <div style="color:var(--muted); white-space: nowrap;">(Realtime)</div>
             <div class="filters" title="Filter delivered/not delivered" style="flex-wrap: nowrap;">
                 <label style="display:flex;align-items:center;gap:.4rem;white-space: nowrap;">
                     <input type="checkbox" id="showDeliveredToggle" /> <span class="muted">Show Delivered</span>
@@ -466,18 +483,12 @@
     const PRODUCTS_API = '/api/admin/products';
     const DELIVER_API_TEMPLATE = id => `/api/admin/orders/${id}/deliver`;
     const DELETE_ORDERS_API = '/api/admin/orders';
-    const POLL_INTERVAL_MS = 15000;
     const PRODUCTS_REFRESH_MS = 60000;
-    const FAILURE_BACKOFF_MULT = 2;
-    const MAX_BACKOFF_MS = 5 * 60 * 1000;
 
     let orders = [];
     let productsMap = new Map();
-    let knownOrderIds = new Set();
     let filteredOrders = [];
     let lastProductsLoad = 0;
-    let pollTimer = null;
-    let pollInterval = POLL_INTERVAL_MS;
     let isFetching = false;
     let selectedOrderIds = new Set();
 
@@ -519,28 +530,13 @@
       isFetching = true;
       try {
         const res = await fetch(ORDERS_API, { credentials: 'same-origin' });
-        if(!res.ok) {
-          if(!silent) showToast('Failed to fetch orders', 'info');
-          throw new Error('Fetch orders failed: ' + res.status);
-        }
+        if(!res.ok) throw new Error('Fetch orders failed: ' + res.status);
         const data = await res.json();
-        const list = Array.isArray(data) ? data : (data ? [data] : []);
-        const newOrders = list.filter(o => !knownOrderIds.has(o.id));
-        if(newOrders.length > 0) {
-          newOrders.forEach(n => {
-            const who = n.customerName || n.email || 'a customer';
-            showToast(`New order from ${who}`, 'success', 4500);
-            knownOrderIds.add(n.id);
-          });
-        }
-        knownOrderIds = new Set(list.map(o => o.id));
-        orders = list;
-        pollInterval = POLL_INTERVAL_MS;
+        orders = Array.isArray(data) ? data : (data ? [data] : []);
         applySearchAndRender();
       } catch(err) {
         console.error('fetchOrders error', err);
         if(!silent) showToast('Could not load orders', 'info');
-        pollInterval = Math.min(pollInterval * FAILURE_BACKOFF_MULT, MAX_BACKOFF_MS);
       } finally {
         isFetching = false;
       }
@@ -806,10 +802,8 @@
     (async () => {
       showDeliveredToggle.checked = false;
       await reloadAllData(true);
-      schedulePolling();
     })();
 
-    document.getElementById('refreshBtn').addEventListener('click', () => { pollInterval = POLL_INTERVAL_MS; reloadAllData(false); });
     document.getElementById('manageProductsBtn').addEventListener('click', () => {
       window.location.href = '/products.html';
     });
@@ -824,26 +818,6 @@
       updateBulkActionsUI();
       updateCheckboxStates();
     });
-
-    function schedulePolling(){
-      if(pollTimer) clearTimeout(pollTimer);
-      pollTimer = setTimeout(async () => {
-        await reloadAllData(true);
-        schedulePolling();
-      }, pollInterval);
-    }
-
-    window.markDeliveredAndRefresh = async function(orderId){
-      try{
-        const resp = await fetch(DELIVER_API_TEMPLATE(orderId), { method: 'PUT', credentials: 'same-origin' });
-        if(!resp.ok) throw new Error('Failed to mark delivered');
-        showToast('Order marked delivered', 'success', 2200);
-        await reloadAllData(true);
-      }catch(err){
-        console.error(err);
-        showToast('Could not mark delivered', 'info', 3000);
-      }
-    }
 </script>
 </body>
 </html>
